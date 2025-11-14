@@ -1,37 +1,37 @@
 import cv2
 
-cap = cv2.VideoCapture("ball.mp4")
+cap = cv2.VideoCapture(0)
 
-#Object detection from stable camera
+if not cap.isOpened():
+    print("Error: Could not open video file")
+    exit()
 
+# Object detection from stable camera
 object_detector = cv2.createBackgroundSubtractorMOG2()
 
 while True:
     ret, frame = cap.read()
+    if not ret:
+        break
 
-    #Object Detection
+    # Object Detection
     mask = object_detector.apply(frame)
-    contours, _ = cv2.findContours(mask,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     for cnt in contours:
         area = cv2.contourArea(cnt)
         if area > 100:
-            #cv2.drawContours(frame, [cnt], - 1, (0, 255, 0), 2)
-            try:
-                
-                x, y, w, h = cv2.boundingRect(cnt)
-                print(str(x) +  "    " + str(y))
-                #cv2.circle(frame, (x + w/2, y + w/2), w/2, 0, 200)
-            except:
-                print()
+            x, y, w, h = cv2.boundingRect(cnt)
+            print(x, y)   # prints the coordinates safely
 
-
+            # Optional: draw a box
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0,255,0), 2)
 
     cv2.imshow("Frame", frame)
     cv2.imshow("Mask", mask)
 
     key = cv2.waitKey(30)
-    if key == 27:   # ESC key
+    if key == 27:  # ESC key
         break
 
 cap.release()
